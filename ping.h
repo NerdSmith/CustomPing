@@ -5,6 +5,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <unistd.h>
 // #include <netinet/ip.h>
 // #include <netinet/in_systm.h>
 #include <string>
@@ -37,13 +40,12 @@ struct PingPkg
 
     void setNbAsMsg(uint32_t nb)
     {
+        bzero(&(this->msg), sizeof(this->msg));
         uint32_t* uint32_msg = (uint32_t*)(this->msg);
         *uint32_msg = nb;
         return;
     }
 };
-
-
 
 unsigned short checksum(void *b, int len);
 

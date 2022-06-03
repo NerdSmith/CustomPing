@@ -40,6 +40,25 @@ bool Ping::Init()
     return true;
 }
 
+std::map<std::uint32_t, PingConfig> Exec() 
+{
+    PingPkg pkg;
+    Counter counter;
+    
+    uint32_t msg = 1;
+    
+    bzero(&pkg, sizeof(pkg));
+    pkg.hdr.type = ICMP_ECHO;
+    pkg.hdr.un.echo.id = getpid();
+
+    pkg.setNbAsMsg(msg);
+    pkg.hdr.un.echo.sequence = counter.nb;
+    counter++;
+    pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
+
+    
+}
+
 Ping::~Ping() 
 {
 
