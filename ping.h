@@ -32,7 +32,7 @@ struct Counter
     }
 };
 
-
+#pragma pack(push,1)
 struct PingPkg
 {
     struct icmphdr hdr;
@@ -40,12 +40,12 @@ struct PingPkg
 
     void setNbAsMsg(uint32_t nb)
     {
-        bzero(&(this->msg), sizeof(this->msg));
         uint32_t* uint32_msg = (uint32_t*)(this->msg);
         *uint32_msg = nb;
         return;
     }
 };
+#pragma pack(pop)
 
 unsigned short checksum(void *b, int len);
 

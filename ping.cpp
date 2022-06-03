@@ -43,9 +43,14 @@ bool Ping::Init()
 std::map<std::uint32_t, PingConfig> Ping::Exec() 
 {
     PingPkg pkg;
+    // pkg.setNbAsMsg(1);
+    // std::cout << *((uint32_t*)pkg.msg) << std::endl;
+    // pkg.setNbAsMsg(2);
+    // std::cout << *((uint32_t*)pkg.msg) << std::endl;
+
     Counter counter;
     int fromlen;
-    uint32_t msg = 1;
+    uint32_t msg = 2643460096;
     
     bzero(&pkg, sizeof(pkg));
     pkg.hdr.type = ICMP_ECHO;
@@ -72,14 +77,17 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
         ) {
             printf("\nPacket Sending Failed!\n");
         }
-    
+    std::cout << "before " << *((uint32_t*)(pkg.msg)) << std::endl;
 
+    PingPkg recvPkg;
+
+    bzero(&recvPkg, sizeof(recvPkg));
     fromlen = sizeof(sockaddr_in);
     if ( 
         recvfrom(
             s, 
-            &pkg, 
-            sizeof(pkg), 
+            &recvPkg, 
+            sizeof(recvPkg), 
             0,
             (struct sockaddr*)&s_addr, 
             (socklen_t*)&fromlen
@@ -87,6 +95,8 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
         ) {
             printf("\nPacket receive failed!\n");
         }
+
+    std::cout << "after " << *((int*)recvPkg.msg) << std::endl; // TODO: resolve
 
     return this->addrCfgs;
     
