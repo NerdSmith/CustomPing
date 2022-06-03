@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
         {2, {"5.255.255.80", "yandex", 2, 0}}
     };
     printMap(testAddrss);
-    Ping Ping(testAddrss);
+    Ping ping(testAddrss);
+    ping.Init();
 
 
     return 0;
