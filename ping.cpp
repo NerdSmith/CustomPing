@@ -40,11 +40,11 @@ bool Ping::Init()
     return true;
 }
 
-std::map<std::uint32_t, PingConfig> Exec() 
+std::map<std::uint32_t, PingConfig> Ping::Exec() 
 {
     PingPkg pkg;
     Counter counter;
-    
+    int fromlen;
     uint32_t msg = 1;
     
     bzero(&pkg, sizeof(pkg));
@@ -56,6 +56,39 @@ std::map<std::uint32_t, PingConfig> Exec()
     counter++;
     pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
 
+    sockaddr_in s_addr = this->addrToSockAddr["173.194.222.101"];
+    int s = this->addrToSock["173.194.222.101"];
+
+    if ( 
+        sendto(
+            s, 
+            &pkg, 
+            sizeof(pkg), 
+            0, 
+            (struct sockaddr*) 
+            &s_addr, 
+            (socklen_t)sizeof(sockaddr_in)
+            ) <= 0
+        ) {
+            printf("\nPacket Sending Failed!\n");
+        }
+    
+
+    fromlen = sizeof(sockaddr_in);
+    if ( 
+        recvfrom(
+            s, 
+            &pkg, 
+            sizeof(pkg), 
+            0,
+            (struct sockaddr*)&s_addr, 
+            (socklen_t*)&fromlen
+            ) <= 0
+        ) {
+            printf("\nPacket receive failed!\n");
+        }
+
+    return this->addrCfgs;
     
 }
 

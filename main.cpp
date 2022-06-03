@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     printMap(testAddrss);
     Ping ping(testAddrss);
     ping.Init();
+    ping.Exec();
 
 
     return 0;
