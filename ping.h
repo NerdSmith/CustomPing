@@ -9,8 +9,26 @@
 // #include <netinet/in_systm.h>
 #include <string>
 #include <map>
+#include <limits>
 
 #define PING_PKT_S 64
+
+struct Counter 
+{
+    u_int16_t nb;
+
+    Counter& operator++(int)
+    {
+        if (this->nb == std::numeric_limits<u_int16_t>::max()) {
+            this->nb = 0;
+        }
+        else {
+            this->nb++;
+        }
+        return *this;
+    }
+};
+
 
 struct PingPkg
 {
@@ -43,7 +61,7 @@ private:
     std::map<std::uint32_t, PingConfig> addrCfgs;
     std::map<std::string, sockaddr_in> addrToSockAddr;
     std::map<std::string, int> addrToSock;
-    PingPkg pingPkg;
+    //PingPkg pingPkg;
 
 
 public:

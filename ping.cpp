@@ -1,6 +1,7 @@
 #include "ping.h"
 
-#include <stdio.h>
+#include <iostream>
+#include <limits>
 
 unsigned short checksum(void *b, int len)
 {    
@@ -35,12 +36,6 @@ bool Ping::Init()
             return false;
         }
     }
-
-    PingPkg pingPkg;
-    int a = 12;
-    printf("%d\n", a);
-    pingPkg.setNbAsMsg(a);
-    printf("%d\n", *((int*) pingPkg.msg));
 
     return true;
 }
