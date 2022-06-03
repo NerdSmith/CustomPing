@@ -11,6 +11,8 @@ bool Ping::Init()
 
         addrToSockAddr[kv.second.IP];//.insert(std::pair<std::string, sockaddr_in>(kv.second.IP, sockaddr_in()));
         // std::cout << kv.first << " has value " << kv.second << std::endl;
+
+
         
         // TODO: Setting addr
     }
