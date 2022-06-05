@@ -13,16 +13,17 @@
 // #include <netinet/in_systm.h>
 #include <string>
 #include <map>
+#include <set>
 #include <limits>
 
 
 #define PING_PKT_S 64
 
-struct Counter 
+struct SeqCounter 
 {
     u_int16_t nb = 0;
 
-    Counter& operator++(int)
+    SeqCounter& operator++(int)
     {
         if (this->nb == std::numeric_limits<u_int16_t>::max()) {
             this->nb = 0;

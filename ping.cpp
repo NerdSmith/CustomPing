@@ -51,17 +51,29 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
     PingPkgRecv recvPkg;
     bzero(&recvPkg, sizeof(recvPkg));
 
-    Counter counter;
+    SeqCounter seqCounter;
     int fromlen;
+    std::set<uint32_t> toSend;
+
+    // debug vars
     uint32_t msg = 1;
-    
+    // debug vars end
+
+    for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
+        toSend.insert(it->first);
+    }
+
+    auto er = toSend.begin();
+    toSend.erase(er);
+
+
     pkg.hdr.type = ICMP_ECHO;
     pkg.hdr.un.echo.id = getpid();
     pkg.setNbAsMsg(msg);
 
-    counter++;
-    pkg.hdr.un.echo.sequence = counter.nb;
-    counter++;
+    seqCounter++;
+    pkg.hdr.un.echo.sequence = seqCounter.nb;
+    seqCounter++;
     pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
 
     sockaddr_in s_addr = this->addrToSockAddr["173.194.222.101"];
@@ -95,10 +107,9 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
             printf("\nPacket receive failed!\n");
         }
 
-    std::cout << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
+    // std::cout << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
 
     return this->addrCfgs;
-    
 }
 
 Ping::~Ping() 
