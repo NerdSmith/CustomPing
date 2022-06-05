@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
+#include <netinet/ip.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
@@ -14,11 +15,12 @@
 #include <map>
 #include <limits>
 
+
 #define PING_PKT_S 64
 
 struct Counter 
 {
-    u_int16_t nb;
+    u_int16_t nb = 0;
 
     Counter& operator++(int)
     {
@@ -32,7 +34,7 @@ struct Counter
     }
 };
 
-#pragma pack(push,1)
+#pragma pack(push, 1)
 struct PingPkg
 {
     struct icmphdr hdr;
@@ -47,9 +49,18 @@ struct PingPkg
 };
 #pragma pack(pop)
 
+#pragma pack(push, 1)
+struct PingPkgRecv
+{
+    struct ip ip_hdr;
+    struct PingPkg ping_pkg;
+};
+#pragma pack(pop)
+
 unsigned short checksum(void *b, int len);
 
-struct PingConfig {
+struct PingConfig 
+{
     std::string IP;
 //    std::uint32_t port;
     std::string name;

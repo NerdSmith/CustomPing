@@ -1,7 +1,10 @@
 #include "ping.h"
 
+#include <cstring>
 #include <iostream>
 #include <limits>
+#include <netinet/ip.h>
+
 
 unsigned short checksum(void *b, int len)
 {    
@@ -43,20 +46,20 @@ bool Ping::Init()
 std::map<std::uint32_t, PingConfig> Ping::Exec() 
 {
     PingPkg pkg;
-    // pkg.setNbAsMsg(1);
-    // std::cout << *((uint32_t*)pkg.msg) << std::endl;
-    // pkg.setNbAsMsg(2);
-    // std::cout << *((uint32_t*)pkg.msg) << std::endl;
+    bzero(&pkg, sizeof(pkg));
+
+    PingPkgRecv recvPkg;
+    bzero(&recvPkg, sizeof(recvPkg));
 
     Counter counter;
     int fromlen;
-    uint32_t msg = 2643460096;
+    uint32_t msg = 1;
     
-    bzero(&pkg, sizeof(pkg));
     pkg.hdr.type = ICMP_ECHO;
     pkg.hdr.un.echo.id = getpid();
-
     pkg.setNbAsMsg(msg);
+
+    counter++;
     pkg.hdr.un.echo.sequence = counter.nb;
     counter++;
     pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
@@ -77,11 +80,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
         ) {
             printf("\nPacket Sending Failed!\n");
         }
-    std::cout << "before " << *((uint32_t*)(pkg.msg)) << std::endl;
 
-    PingPkg recvPkg;
-
-    bzero(&recvPkg, sizeof(recvPkg));
     fromlen = sizeof(sockaddr_in);
     if ( 
         recvfrom(
@@ -96,7 +95,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
             printf("\nPacket receive failed!\n");
         }
 
-    std::cout << "after " << *((int*)recvPkg.msg) << std::endl; // TODO: resolve
+    std::cout << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
 
     return this->addrCfgs;
     
