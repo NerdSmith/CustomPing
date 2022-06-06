@@ -10,6 +10,7 @@
 #include <strings.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <sys/time.h>
 // #include <netinet/ip.h>
 // #include <netinet/in_systm.h>
 #include <string>
@@ -19,6 +20,8 @@
 
 
 #define PING_PKT_S 64
+// #define TIMEOUT timeval {1, 0}
+
 
 struct SeqCounter 
 {
@@ -44,6 +47,7 @@ struct PingPkg
 
     void setNbAsMsg(uint32_t nb)
     {
+        bzero(&(this->msg), sizeof(this->msg));
         uint32_t* uint32_msg = (uint32_t*)(this->msg);
         *uint32_msg = nb;
         return;
@@ -61,13 +65,22 @@ struct PingPkgRecv
 
 unsigned short checksum(void *b, int len);
 
+
+enum class PingStatus 
+{
+    W_4_SEND,
+    W_4_ANSV,
+    OK,
+    ERR
+};
+
 struct PingConfig 
 {
     std::string IP;
 //    std::uint32_t port;
     std::string name;
     std::uint32_t Id;
-    int status;
+    PingStatus status = PingStatus::W_4_SEND;
 };
 
 class Ping
@@ -76,6 +89,7 @@ private:
     std::map<std::uint32_t, PingConfig> addrCfgs;
     std::map<std::string, sockaddr_in> addrToSockAddr;
     std::map<std::string, int> addrToSock;
+    SeqCounter seqCounter;
     //PingPkg pingPkg;
 
 

@@ -5,9 +5,23 @@
 
 #include "ping.h"
 
+
 void printPingConfig(const PingConfig& pCfg) 
 {
-    std::cout << pCfg.IP << " " << pCfg.name << " " << pCfg.Id << " " << pCfg.status << "\n";
+    std::string status;
+    switch (pCfg.status) {
+        case (PingStatus::W_4_SEND):
+            status = "W_4_send";
+            break;
+        case (PingStatus::W_4_ANSV):
+            status = "W_4_ANSV";
+            break;
+        case (PingStatus::OK):
+            status = "OK";
+            break;
+    }
+
+    std::cout << pCfg.IP << " " << pCfg.name << " " << pCfg.Id << " " << status << "\n";
 }
 
 void printMap(std::map<std::uint32_t, PingConfig> myMap) 
@@ -24,13 +38,19 @@ int main(int argc, char *argv[])
 {
     
     std::map<std::uint32_t, PingConfig> testAddrss = {
-        {1, {"173.194.222.101", "google", 1, 0}},
-        {2, {"5.255.255.80", "yandex", 2, 0}}
+        {3, {"173.194.222.101", "google", 1}},
+        {2, {"5.255.255.80", "yandex", 2}}
     };
     printMap(testAddrss);
     Ping ping(testAddrss);
     std::cout << "init: " << ping.Init() << std::endl;
     ping.Exec();
+    sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
 
 
     return 0;
