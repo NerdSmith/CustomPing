@@ -63,15 +63,35 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
         toSend.insert(it->first);
     }
 
-    auto er = toSend.begin();
-    toSend.erase(er);
+    std::set<uint32_t>::iterator er;
+    // toSend.erase(er);
 
+    fd_set sockets_fds;
+
+    std::string currIP;
+    while (!toSend.empty()) {
+        FD_ZERO(&sockets_fds);
+
+        for (std::set<uint32_t>::iterator it = toSend.begin(); it != toSend.end(); it++) {
+            currIP = this->addrCfgs[*it].IP;
+            std::cout << "ip adding: " << currIP << std::endl; 
+            FD_SET(addrToSock[currIP], &sockets_fds);
+        }
+
+
+
+
+        er = toSend.begin();
+        std::cout << "rm: " << *er << std::endl;
+        toSend.erase(er);
+    }
 
     pkg.hdr.type = ICMP_ECHO;
-    pkg.hdr.un.echo.id = getpid();
+    // std::cout << "pid: " << getpid() << " " << std::endl;
+    pkg.hdr.un.echo.id = getpid() % std::numeric_limits<u_int16_t>::max();
+    std::cout << "pid echo: " << pkg.hdr.un.echo.id << " " << std::endl;
     pkg.setNbAsMsg(msg);
 
-    seqCounter++;
     pkg.hdr.un.echo.sequence = seqCounter.nb;
     seqCounter++;
     pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));

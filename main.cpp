@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     };
     printMap(testAddrss);
     Ping ping(testAddrss);
-    ping.Init();
+    std::cout << "init: " << ping.Init() << std::endl;
     ping.Exec();
 
 
