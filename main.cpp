@@ -45,12 +45,12 @@ int main(int argc, char *argv[])
     Ping ping(testAddrss);
     std::cout << "init: " << ping.Init() << std::endl;
     ping.Exec();
-    sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
+    // sleep(1);
+    // testAddrss = ping.Exec();
+    // printMap(testAddrss);
+    // sleep(1);
+    // testAddrss = ping.Exec();
+    // printMap(testAddrss);
 
 
     return 0;

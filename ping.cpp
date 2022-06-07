@@ -211,23 +211,90 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
                 // it->second.status = PingStatus::W_4_ANSV;
             }
 
+            msghdr msghdr;
+            char payload_buffer[4096];
+            ssize_t payload_buffer_len;
+            char control_buffer[4096];
+            struct iovec payload_iovec;
 
-                if (recvmsg(
-                    sock, 
-                    &recvPkg, 
-                    sizeof(recvPkg), 
-                    0,
-                    (struct sockaddr*)&(addrToSockAddr[currIP]), 
-                    (socklen_t*)&fromlen
-                    ) <= 0) {
-                        it->second.status = PingStatus::ERR;
-                        std::cout << "Packet receive failed!" << std::endl;
+            while (1) {
+                fd_set toRead;
+                FD_ZERO(&toRead);
+
+                FD_SET(sock, &toRead);
+
+                select(10, &toRead, NULL, NULL, &timeout);
+
+                if (FD_ISSET(sock, &toRead)) {
+                    memset (&payload_iovec, 0, sizeof (payload_iovec));
+                    payload_iovec.iov_base = payload_buffer;
+                    payload_iovec.iov_len = sizeof (payload_buffer);
+
+                    memset (&msghdr, 0, sizeof (msghdr));
+                    msghdr.msg_name = NULL;
+                    msghdr.msg_namelen = 0;
+
+                    msghdr.msg_iov = &payload_iovec;
+                    msghdr.msg_iovlen = 1;
+
+                    msghdr.msg_control = control_buffer;
+                    msghdr.msg_controllen = sizeof (control_buffer);
+
+                    msghdr.msg_flags = 0;
+
+                    payload_buffer_len = recvmsg (sock, &msghdr, /* flags = */ 0);
+
+                    std::cout << "len" << payload_buffer_len << std::endl;
+                    for(int i = 0; i < payload_buffer_len; i++)
+                    {
+                        std::cout << std::hex << (int)(payload_buffer)[i] << " ";
                     }
-            else {
-                printBytes(recvPkg);
-                std::cout << "ansv: " << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
-                this->addrCfgs[*((uint32_t*) recvPkg.ping_pkg.msg)].status = PingStatus::OK;
+                    std::cout << std::endl;
+                }
+
             }
+
+            // memset (&payload_iovec, 0, sizeof (payload_iovec));
+            // payload_iovec.iov_base = payload_buffer;
+	        // payload_iovec.iov_len = sizeof (payload_buffer);
+
+            // memset (&msghdr, 0, sizeof (msghdr));
+            // msghdr.msg_name = NULL;
+            // msghdr.msg_namelen = 0;
+
+            // msghdr.msg_iov = &payload_iovec;
+            // msghdr.msg_iovlen = 1;
+
+            // msghdr.msg_control = control_buffer;
+	        // msghdr.msg_controllen = sizeof (control_buffer);
+
+            // msghdr.msg_flags = 0;
+
+            // payload_buffer_len = recvmsg (sock, &msghdr, /* flags = */ 0);
+
+            // std::cout << "len" << payload_buffer_len << std::endl;
+            // for(int i = 0; i < payload_buffer_len; i++)
+            // {
+            //     std::cout << std::hex << (int)(payload_buffer)[i] << " ";
+            // }
+            // std::cout << std::endl;
+
+            //     if (recvmsg(
+            //         sock, 
+            //         &recvPkg, 
+            //         sizeof(recvPkg), 
+            //         0,
+            //         (struct sockaddr*)&(addrToSockAddr[currIP]), 
+            //         (socklen_t*)&fromlen
+            //         ) <= 0) {
+            //             it->second.status = PingStatus::ERR;
+            //             std::cout << "Packet receive failed!" << std::endl;
+            //         }
+            // else {
+            //     printBytes(recvPkg);
+            //     std::cout << "ansv: " << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
+            //     this->addrCfgs[*((uint32_t*) recvPkg.ping_pkg.msg)].status = PingStatus::OK;
+            // }
 
     // }
 
