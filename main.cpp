@@ -33,6 +33,15 @@ void printMap(std::map<std::uint32_t, PingConfig> myMap)
     }
 }
 
+bool checkAllStatus(std::map<std::uint32_t, PingConfig> addrss) {
+    for(std::map<std::uint32_t, PingConfig>::iterator it = addrss.begin(); it != addrss.end(); ++it) {
+        if (it->second.status != PingStatus::OK) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -45,50 +54,15 @@ int main(int argc, char *argv[])
     printMap(testAddrss);
     Ping ping(testAddrss);
     std::cout << "init: " << ping.Init() << std::endl;
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
 
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
+    while (!checkAllStatus(testAddrss)) {
+        testAddrss = ping.Exec();
+        // printMap(testAddrss);
+    }
 
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
     // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
 
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
     // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    // sleep(1);
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
-    
-    testAddrss = ping.Exec();
-    printMap(testAddrss);
 
     return 0;
 }
