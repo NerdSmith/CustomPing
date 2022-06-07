@@ -73,42 +73,147 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
     // std::set<uint32_t> toSend, toRead;
 
     // 4 sock read & write
-    fd_set toRead, toSend;
-    int maxSockNb = -1;
-    FD_ZERO(&toRead);
-    FD_ZERO(&toSend);
-    for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
-        currIP = it->second.IP;
-        if (addrToSock[currIP] > maxSockNb) {
-            maxSockNb = addrToSock[currIP];
-        }
+    // fd_set toRead, toSend;
+    // int maxSockNb = -1;
+    // FD_ZERO(&toRead);
+    // FD_ZERO(&toSend);
+    // for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
+    //     currIP = it->second.IP;
+    //     if (addrToSock[currIP] > maxSockNb) {
+    //         maxSockNb = addrToSock[currIP];
+    //     }
 
-        if (it->second.status == PingStatus::W_4_ANSV) {
-            FD_SET(addrToSock[currIP], &toRead);
-        }
-        else if (it->second.status == PingStatus::W_4_SEND) {
-            FD_SET(addrToSock[currIP], &toSend);
-        }
-    }
+    //     if (it->second.status == PingStatus::W_4_ANSV) {
+    //         FD_SET(addrToSock[currIP], &toRead);
+    //     }
+    //     else if (it->second.status == PingStatus::W_4_SEND) {
+    //         FD_SET(addrToSock[currIP], &toSend);
+    //     }
+    // }
 
-    // select block
-    selectRes = select(maxSockNb+1, &toRead, &toSend, NULL, &timeout);
+    // // select block
+    // selectRes = select(maxSockNb+1, &toRead, &toSend, NULL, &timeout);
 
-    for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
-        currIP = it->second.IP;
-        std::cout << "curr IP: " << currIP << std::endl;
+    // for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
+    //     currIP = it->second.IP;
+    //     std::cout << "curr IP: " << currIP << std::endl;
 
-        // read
-        if (FD_ISSET(addrToSock[currIP], &toRead)) {
-            bzero(&recvPkg, sizeof(recvPkg));
-            fromlen = sizeof(sockaddr_in);
+    //     // read
+    //     if (FD_ISSET(addrToSock[currIP], &toRead)) {
+    //         bzero(&recvPkg, sizeof(recvPkg));
+    //         fromlen = sizeof(sockaddr_in);
 
-            // std::cout << "recv: " << addrToSock[currIP] << "|";
-            // printBytes(recvPkg);
-            // std::cout << "|" << inet_ntoa(addrToSockAddr[currIP].sin_addr) << "|" << fromlen << std::endl;
-            // TODO: resolve
-            if (recvfrom(
-                    addrToSock[currIP], 
+    //         // std::cout << "recv: " << addrToSock[currIP] << "|";
+    //         // printBytes(recvPkg);
+    //         // std::cout << "|" << inet_ntoa(addrToSockAddr[currIP].sin_addr) << "|" << fromlen << std::endl;
+    //         // TODO: resolve
+    //         if (recvfrom(
+    //                 addrToSock[currIP], 
+    //                 &recvPkg, 
+    //                 sizeof(recvPkg), 
+    //                 0,
+    //                 (struct sockaddr*)&(addrToSockAddr[currIP]), 
+    //                 (socklen_t*)&fromlen
+    //                 ) <= 0) {
+    //                     it->second.status = PingStatus::ERR;
+    //                     std::cout << "Packet receive failed!" << std::endl;
+    //                 }
+    //         else {
+    //             printBytes(recvPkg);
+    //             std::cout << "ansv: " << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
+    //             this->addrCfgs[*((uint32_t*) recvPkg.ping_pkg.msg)].status = PingStatus::OK;
+    //         }
+    //         // std::cout << "recv aft: " << addrToSock[currIP] << "|";
+    //         // printBytes(recvPkg);
+    //         // std::cout << "|" << inet_ntoa(addrToSockAddr[currIP].sin_addr) << "|" << fromlen << std::endl;
+    //     }
+
+    //     // write
+    //     else if (FD_ISSET(addrToSock[currIP], &toSend)) {
+    //         std::cout << "asd\n";
+
+    //         std::cout << "nb: " << it->first << std::endl;
+    //         pkg.setNbAsMsg(it->first);
+
+    //         pkg.hdr.un.echo.sequence = this->seqCounter.nb;
+    //         this->seqCounter++;
+
+    //         pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
+
+    //         if (sendto(
+    //                 addrToSock[currIP], 
+    //                 &pkg, 
+    //                 sizeof(pkg), 
+    //                 0, 
+    //                 (struct sockaddr*)&(this->addrToSockAddr[currIP]), 
+    //                 (socklen_t)sizeof(sockaddr_in)
+    //                 ) <= 0
+    //             ) {
+    //                 it->second.status = PingStatus::ERR;
+    //                 printf("\nPacket Sending Failed!\n");
+    //             }
+    //         else {
+    //             it->second.status = PingStatus::W_4_ANSV;
+    //         }
+    //     }
+    // }
+
+
+    int sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+
+
+                pkg.setNbAsMsg(3);
+
+            pkg.hdr.un.echo.sequence = this->seqCounter.nb;
+            this->seqCounter++;
+
+            pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
+
+    if (sendto(
+                    sock, 
+                    &pkg, 
+                    sizeof(pkg), 
+                    0, 
+                    (struct sockaddr*)&(this->addrToSockAddr["173.194.222.101"]), 
+                    (socklen_t)sizeof(sockaddr_in)
+                    ) <= 0
+                ) {
+                    // it->second.status = PingStatus::ERR;
+                    printf("\nPacket Sending Failed!\n");
+                }
+            else {
+                std::cout << "sended" << 3 << std::endl;
+                // it->second.status = PingStatus::W_4_ANSV;
+            }
+
+
+                pkg.setNbAsMsg(2);
+
+            pkg.hdr.un.echo.sequence = this->seqCounter.nb;
+            this->seqCounter++;
+
+            pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
+
+    if (sendto(
+                    sock, 
+                    &pkg, 
+                    sizeof(pkg), 
+                    0, 
+                    (struct sockaddr*)&(this->addrToSockAddr["5.255.255.80"]), 
+                    (socklen_t)sizeof(sockaddr_in)
+                    ) <= 0
+                ) {
+                    // it->second.status = PingStatus::ERR;
+                    printf("\nPacket Sending Failed!\n");
+                }
+            else {
+                std::cout << "sended" << 2 << std::endl;
+                // it->second.status = PingStatus::W_4_ANSV;
+            }
+
+
+                if (recvmsg(
+                    sock, 
                     &recvPkg, 
                     sizeof(recvPkg), 
                     0,
@@ -123,40 +228,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
                 std::cout << "ansv: " << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
                 this->addrCfgs[*((uint32_t*) recvPkg.ping_pkg.msg)].status = PingStatus::OK;
             }
-            // std::cout << "recv aft: " << addrToSock[currIP] << "|";
-            // printBytes(recvPkg);
-            // std::cout << "|" << inet_ntoa(addrToSockAddr[currIP].sin_addr) << "|" << fromlen << std::endl;
-        }
 
-        // write
-        else if (FD_ISSET(addrToSock[currIP], &toSend)) {
-            std::cout << "asd\n";
-
-            std::cout << "nb: " << it->first << std::endl;
-            pkg.setNbAsMsg(it->first);
-
-            pkg.hdr.un.echo.sequence = this->seqCounter.nb;
-            this->seqCounter++;
-
-            pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
-
-            if (sendto(
-                    addrToSock[currIP], 
-                    &pkg, 
-                    sizeof(pkg), 
-                    0, 
-                    (struct sockaddr*)&(this->addrToSockAddr[currIP]), 
-                    (socklen_t)sizeof(sockaddr_in)
-                    ) <= 0
-                ) {
-                    it->second.status = PingStatus::ERR;
-                    printf("\nPacket Sending Failed!\n");
-                }
-            else {
-                it->second.status = PingStatus::W_4_ANSV;
-            }
-        }
-    }
     // }
 
     // debug vars
