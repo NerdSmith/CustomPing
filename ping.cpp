@@ -91,6 +91,8 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
         }
     }
 
+
+
     // select block
     selectRes = select(maxSockNb+1, &toRead, &toSend, NULL, &timeout);
 
