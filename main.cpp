@@ -39,19 +39,56 @@ int main(int argc, char *argv[])
     
     std::map<std::uint32_t, PingConfig> testAddrss = {
         {3, {"173.194.222.101", "google", 1}},
-        {2, {"5.255.255.80", "yandex", 2}}
+        {2, {"5.255.255.80", "yandex", 2}},
+        {4, {"31.13.72.36", "facebook", 3}}
     };
     printMap(testAddrss);
     Ping ping(testAddrss);
     std::cout << "init: " << ping.Init() << std::endl;
-    ping.Exec();
-    sleep(1);
     testAddrss = ping.Exec();
     printMap(testAddrss);
-    sleep(1);
+    // sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    // sleep(1);
     testAddrss = ping.Exec();
     printMap(testAddrss);
 
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    // sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    // sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    // sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    // sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    // sleep(1);
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
+    
+    testAddrss = ping.Exec();
+    printMap(testAddrss);
 
     return 0;
 }
