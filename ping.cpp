@@ -71,7 +71,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
     int fromlen, selectRes;
 
     std::string currIP;
-    timeval timeout {0, 10000};
+    timeval timeout {0, 100000};
 
     // 4 sock read & write
     fd_set toRead, toSend;
@@ -96,6 +96,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
     selectRes = select(maxSockNb+1, &toRead, &toSend, NULL, &timeout);
 
     if (selectRes == 0) {
+        std::cout << "timeout" << std::endl;
         for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
             currIP = it->second.IP;
             if (it->second.status == PingStatus::W_4_ANSV) {
@@ -114,6 +115,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
 
         // read
         if (FD_ISSET(addrToSock[currIP], &toRead)) {
+            std::cout << "read" << std::endl;
             bzero(&recvPkg, sizeof(recvPkg));
             fromlen = sizeof(sockaddr_in);
             

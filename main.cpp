@@ -49,15 +49,18 @@ int main(int argc, char *argv[])
     std::map<std::uint32_t, PingConfig> testAddrss = {
         {3, {"173.194.222.101", "google", 1}},
         {2, {"5.255.255.80", "yandex", 2}},
-        {4, {"31.13.72.36", "facebook", 3}}
+        {4, {"31.13.72.36", "facebook", 3}},
     };
     printMap(testAddrss);
     Ping ping(testAddrss);
     std::cout << "init: " << ping.Init() << std::endl;
 
-    while (!checkAllStatus(testAddrss)) {
+
+    int c;
+    while (!checkAllStatus(testAddrss) && c < 6) {
         testAddrss = ping.Exec();
-        // printMap(testAddrss);
+        printMap(testAddrss);
+        c++;
     }
 
     // sleep(1);
