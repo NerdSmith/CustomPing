@@ -88,7 +88,8 @@ class Ping
 private:
     std::map<std::uint32_t, PingConfig> addrCfgs;
     std::map<std::string, sockaddr_in> addrToSockAddr;
-    std::map<std::string, int> addrToSock;
+    int sock;
+    // std::map<std::string, int> addrToSock;
     SeqCounter seqCounter;
     //PingPkg pingPkg;
 

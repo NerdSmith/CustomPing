@@ -42,7 +42,7 @@ bool Ping::Init()
         addrToSockAddr[kv.second.IP].sin_family = AF_INET;
         addrToSockAddr[kv.second.IP].sin_addr.s_addr = inet_addr(kv.second.IP.c_str());
         
-        if ((addrToSock[kv.second.IP] = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+        if ((sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
             return false;
         }
     }
@@ -160,85 +160,6 @@ std::map<std::uint32_t, PingConfig> Ping::Exec()
         }
     }
     // }
-
-    // debug vars
-    // uint32_t msg = 1;
-    // debug vars end
-
-    // for(std::map<std::uint32_t, PingConfig>::iterator it = this->addrCfgs.begin(); it != this->addrCfgs.end(); ++it) {
-    //     toSend.insert(it->first);
-    // }
-
-    // std::set<uint32_t>::iterator er;
-    // // toSend.erase(er);
-
-    // fd_set sockets_fds;
-
-    // std::string currIP;
-    // while (!toSend.empty()) {
-    //     FD_ZERO(&sockets_fds);
-
-    //     for (std::set<uint32_t>::iterator it = toSend.begin(); it != toSend.end(); it++) {
-    //         currIP = this->addrCfgs[*it].IP;
-    //         std::cout << "ip adding: " << currIP << std::endl; 
-    //         FD_SET(addrToSock[currIP], &sockets_fds);
-    //     }
-
-    //     // on send 
-
-
-
-
-
-
-    //     er = toSend.begin();
-    //     std::cout << "rm: " << *er << std::endl;
-    //     toSend.erase(er);
-    // }
-
-    // pkg.hdr.type = ICMP_ECHO;
-    // // std::cout << "pid: " << getpid() << " " << std::endl;
-    // pkg.hdr.un.echo.id = getpid() % std::numeric_limits<u_int16_t>::max();
-    // std::cout << "pid echo: " << pkg.hdr.un.echo.id << " " << std::endl;
-    // pkg.setNbAsMsg(msg);
-
-    // pkg.hdr.un.echo.sequence = this->seqCounter.nb;
-    // this->seqCounter++;
-    // pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
-
-    // sockaddr_in s_addr = this->addrToSockAddr["173.194.222.101"];
-    // int s = this->addrToSock["173.194.222.101"];
-
-    // if ( 
-    //     sendto(
-    //         s, 
-    //         &pkg, 
-    //         sizeof(pkg), 
-    //         0, 
-    //         (struct sockaddr*) 
-    //         &s_addr, 
-    //         (socklen_t)sizeof(sockaddr_in)
-    //         ) <= 0
-    //     ) {
-    //         printf("\nPacket Sending Failed!\n");
-    //     }
-
-    // fromlen = sizeof(sockaddr_in);
-    // if ( 
-    //     recvfrom(
-    //         s, 
-    //         &recvPkg, 
-    //         sizeof(recvPkg), 
-    //         0,
-    //         (struct sockaddr*)&s_addr, 
-    //         (socklen_t*)&fromlen
-    //         ) <= 0
-    //     ) {
-    //         printf("\nPacket receive failed!\n");
-    //     }
-
-    // std::cout << *((uint32_t*) recvPkg.ping_pkg.msg) << std::endl;
-
     return this->addrCfgs;
 }
 
