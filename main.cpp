@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     std::cout << "init: " << ping.Init() << std::endl;
 
     int c;
-    while (!checkAllStatus(testAddrss) && c < 15) {
+    while (!checkAllStatus(testAddrss)) {
         testAddrss = ping.Exec();
         printMap(testAddrss);
         c++;
