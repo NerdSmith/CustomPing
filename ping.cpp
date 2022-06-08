@@ -125,6 +125,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
                    (socklen_t *)&fromlen) <= 0) {
         it->second.status = PingStatus::ERR;
       } else {
+        printBytes(recvPkg);
         // std::cout << "ansv: " << *((uint32_t*) recvPkg.ping_pkg.msg) <<
         // std::endl;
         this->addrCfgs[*((uint32_t *)recvPkg.ping_pkg.msg)].status =

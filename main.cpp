@@ -43,10 +43,25 @@ bool checkAllStatus(std::map<std::uint32_t, PingConfig> addrss) {
 
 int main(int argc, char *argv[]) {
 
+  PingConfig pc1;
+  pc1.IP = "173.194.222.101";
+  pc1.name = "google";
+  pc1.Id = 1;
+
+  PingConfig pc2;
+  pc2.IP = "5.255.255.80";
+  pc2.name = "yandex";
+  pc2.Id = 2;
+
+  PingConfig pc3;
+  pc3.IP = "31.13.72.36";
+  pc3.name = "facebook";
+  pc3.Id = 3;
+
   std::map<std::uint32_t, PingConfig> testAddrss = {
-      {3, {"173.194.222.101", "google", 1}},
-      {2, {"5.255.255.80", "yandex", 2}},
-      {4, {"31.13.72.36", "facebook", 3}},
+      {3, pc1},
+      {2, pc2},
+      {4, pc3},
   };
   printMap(testAddrss);
   Ping ping(testAddrss);
