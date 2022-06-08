@@ -63,6 +63,38 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     return 0;
 }
 
+int ping_send_one(int sock, u_int16_t nb, uint32_t msg_key,
+                  std::map<std::uint32_t, PingConfig> &addrCfgs,
+                  std::map<std::string, sockaddr_in> &addrToSockAddr) {
+    ssize_t send_size;
+    std::string currIP = addrCfgs[msg_key].IP;
+
+    PingPkg pkg;
+    memset(&pkg, 0, sizeof(pkg));
+
+    pkg.hdr.type = ICMP_ECHO;
+    pkg.hdr.un.echo.id = getpid() % std::numeric_limits<u_int16_t>::max();
+    pkg.setNbAsMsg(msg_key);
+
+    pkg.hdr.un.echo.sequence = nb;
+
+    pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
+
+    send_size = sendto(sock, &pkg, sizeof(pkg), 0,
+                       (struct sockaddr *)&(addrToSockAddr[currIP]),
+                       (socklen_t)sizeof(sockaddr_in));
+    if (send_size <= 0) {
+        std::cout << "ERR send" << std::endl;
+        addrCfgs[msg_key].status = PingStatus::ERR;
+        return 1;
+    } else {
+        std::cout << "send OK" << std::endl;
+        addrCfgs[msg_key].status = PingStatus::W_4_ANSV;
+    }
+
+    return 0;
+}
+
 unsigned short checksum(void *b, int len) {
     unsigned short *buf = (unsigned short *)b;
     unsigned int sum = 0;
@@ -101,7 +133,7 @@ bool Ping::Init() {
 
 std::map<std::uint32_t, PingConfig> Ping::Exec() {
     int max_fd = sock;
-    timeval timeout{0, 1000000};
+    timeval timeout{0, 10000};
 
     for (std::map<std::uint32_t, PingConfig>::iterator it =
              this->addrCfgs.begin();
@@ -110,16 +142,16 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
         fd_set read_fds;
         fd_set write_fds;
 
-        int max_fd = -1;
-
         FD_ZERO(&read_fds);
         FD_ZERO(&write_fds);
 
         if (it->second.status == PingStatus::W_4_ANSV) {
+            std::cout << "added to w8" << std::endl;
             FD_SET(sock, &read_fds);
         }
 
         if (it->second.status == PingStatus::W_4_SEND) {
+            std::cout << "added to send" << std::endl;
             FD_SET(sock, &write_fds);
         }
 
@@ -134,8 +166,16 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
         }
 
         if (FD_ISSET(sock, &read_fds)) {
+            std::cout << "recv" << std::endl;
             ping_receive_one(this->sock, this->addrCfgs);
             continue;
+        }
+
+        if (FD_ISSET(sock, &write_fds)) {
+            std::cout << "sending" << std::endl;
+            ping_send_one(this->sock, this->seqCounter.nb, it->first,
+                          this->addrCfgs, this->addrToSockAddr);
+            this->seqCounter.nb++;
         }
     }
 
