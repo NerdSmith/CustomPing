@@ -2,24 +2,25 @@
 #define PING_H
 
 #include <arpa/inet.h>
+#include <cstring>
+#include <limits>
+#include <map>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
+#include <set>
 #include <stdlib.h>
+#include <string>
 #include <strings.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
-// #include <netinet/ip.h>
-// #include <netinet/in_systm.h>
-#include <limits>
-#include <map>
-#include <set>
-#include <string>
 
 #define PING_PKT_S 64
-// #define TIMEOUT timeval {1, 0}
+
+static timeval timeout{0, 10000};
+#define TIMEOUT timeout
 
 struct SeqCounter {
     u_int16_t nb = 0;
@@ -72,9 +73,7 @@ class Ping {
     std::map<std::uint32_t, PingConfig> addrCfgs;
     std::map<std::string, sockaddr_in> addrToSockAddr;
     int sock;
-    // std::map<std::string, int> addrToSock;
     SeqCounter seqCounter;
-    // PingPkg pingPkg;
 
   public:
     Ping(std::map<std::uint32_t, PingConfig> addrCfgs);

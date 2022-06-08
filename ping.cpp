@@ -1,24 +1,5 @@
 #include "ping.h"
 
-#include <cstring>
-#include <iostream>
-#include <limits>
-#include <netinet/ip.h>
-
-void printBytes(PingPkgRecv &recvPkg) {
-    for (int i = 0; i < sizeof(recvPkg); i++) {
-        std::cout << std::hex << (int)((char *)&recvPkg)[i] << " ";
-    }
-    std::cout << std::endl;
-}
-
-void printBytes(PingPkg &pkg) {
-    for (int i = 0; i < sizeof(pkg); i++) {
-        std::cout << std::hex << (int)((char *)&pkg)[i] << " ";
-    }
-    std::cout << std::endl;
-}
-
 int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     struct msghdr msg_hdr;
     char payload_buffer[4096];
@@ -84,11 +65,9 @@ int ping_send_one(int sock, u_int16_t nb, uint32_t msg_key,
                        (struct sockaddr *)&(addrToSockAddr[currIP]),
                        (socklen_t)sizeof(sockaddr_in));
     if (send_size <= 0) {
-        std::cout << "ERR send" << std::endl;
         addrCfgs[msg_key].status = PingStatus::ERR;
         return 1;
     } else {
-        std::cout << "send OK" << std::endl;
         addrCfgs[msg_key].status = PingStatus::W_4_ANSV;
     }
 
@@ -117,9 +96,7 @@ Ping::Ping(std::map<std::uint32_t, PingConfig> addrCfgs) {
 bool Ping::Init() {
     for (const auto &kv : this->addrCfgs) {
 
-        addrToSockAddr[kv.second.IP]; //.insert(std::pair<std::string,
-                                      // sockaddr_in>(kv.second.IP,
-                                      // sockaddr_in()));
+        addrToSockAddr[kv.second.IP];
         addrToSockAddr[kv.second.IP].sin_family = AF_INET;
         addrToSockAddr[kv.second.IP].sin_addr.s_addr =
             inet_addr(kv.second.IP.c_str());
@@ -146,33 +123,27 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
         FD_ZERO(&write_fds);
 
         if (it->second.status == PingStatus::W_4_ANSV) {
-            std::cout << "added to w8" << std::endl;
             FD_SET(sock, &read_fds);
         }
 
         if (it->second.status == PingStatus::W_4_SEND) {
-            std::cout << "added to send" << std::endl;
             FD_SET(sock, &write_fds);
         }
 
-        int status = select(max_fd + 1, &read_fds, &write_fds, NULL, &timeout);
+        int status = select(max_fd + 1, &read_fds, &write_fds, NULL, &TIMEOUT);
 
         if (status == -1) {
-            std::cout << "ERR" << std::endl;
             return this->addrCfgs;
         } else if (status == 0) {
-            std::cout << "timeout" << std::endl;
             continue;
         }
 
         if (FD_ISSET(sock, &read_fds)) {
-            std::cout << "recv" << std::endl;
             ping_receive_one(this->sock, this->addrCfgs);
             continue;
         }
 
         if (FD_ISSET(sock, &write_fds)) {
-            std::cout << "sending" << std::endl;
             ping_send_one(this->sock, this->seqCounter.nb, it->first,
                           this->addrCfgs, this->addrToSockAddr);
             this->seqCounter.nb++;
