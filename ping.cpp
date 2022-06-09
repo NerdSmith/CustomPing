@@ -137,7 +137,8 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
             FD_SET(sock, &write_fds);
         }
 
-        int status = select(max_fd + 1, &read_fds, &write_fds, NULL, &TIMEOUT);
+        int status =
+            select(max_fd + 1, &read_fds, &write_fds, NULL, &currTimeout);
 
         if (status == -1) {
             return this->addrCfgs;
