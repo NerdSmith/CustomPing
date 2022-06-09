@@ -1,7 +1,5 @@
 #include "ping.h"
 
-#include <iostream>
-
 int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     struct msghdr msg_hdr;
     char payload_buffer[4096];
