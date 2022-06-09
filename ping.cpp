@@ -1,11 +1,14 @@
 #include "ping.h"
 
+#include <iostream>
+
 int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     struct msghdr msg_hdr;
     char payload_buffer[4096];
     ssize_t payload_buffer_len;
     char control_buffer[4096];
     struct iovec payload_iovec;
+    icmphdr *payload_icmp_hdr;
 
     int data_offset;
     uint32_t msg_key;
@@ -35,10 +38,18 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
 
     data_offset = payload_buffer_len - PING_PKT_S + sizeof(icmphdr);
 
+    // payload_icmp_hdr =
+    //     (icmphdr *)(payload_buffer + payload_buffer_len - PING_PKT_S);
+
+    // std::cout << "type: " << std::hex << (int)payload_icmp_hdr->type
+    //           << "|code: " << (int)payload_icmp_hdr->code << std::endl;
+
     msg_key = *((uint32_t *)(payload_buffer + (payload_buffer_len - PING_PKT_S +
                                                sizeof(icmphdr))));
     if (addrCfgs.find(msg_key) != addrCfgs.end()) {
         addrCfgs[msg_key].status = PingStatus::OK;
+    } else {
+        return -1;
     }
 
     return 0;
@@ -53,13 +64,14 @@ int ping_send_one(int sock, u_int16_t nb, uint32_t msg_key,
     PingPkg pkg;
     memset(&pkg, 0, sizeof(pkg));
 
-    pkg.hdr.type = ICMP_ECHO;
-    pkg.hdr.un.echo.id = getpid() % std::numeric_limits<u_int16_t>::max();
+    pkg.payload_icmp_hdr.type = ICMP_ECHO;
+    pkg.payload_icmp_hdr.un.echo.id =
+        getpid() % std::numeric_limits<u_int16_t>::max();
     pkg.setNbAsMsg(msg_key);
 
-    pkg.hdr.un.echo.sequence = nb;
+    pkg.payload_icmp_hdr.un.echo.sequence = nb;
 
-    pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
+    pkg.payload_icmp_hdr.checksum = checksum(&pkg, sizeof(pkg));
 
     send_size = sendto(sock, &pkg, sizeof(pkg), 0,
                        (struct sockaddr *)&(addrToSockAddr[currIP]),

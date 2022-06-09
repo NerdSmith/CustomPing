@@ -1,6 +1,7 @@
 #ifndef PING_H
 #define PING_H
 
+#include "icmp_msgs.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <limits>
@@ -66,6 +67,7 @@ struct PingConfig {
     std::string name;
     std::uint32_t Id;
     PingStatus status = PingStatus::W_4_SEND;
+    IcmpMsg icmpMsg;
 };
 
 class Ping {
