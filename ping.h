@@ -1,7 +1,7 @@
 #ifndef PING_H
 #define PING_H
 
-#include "icmp_msgs.h"
+// #include "icmp_msgs.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <limits>
@@ -20,7 +20,7 @@
 
 #define PING_PKT_S 64
 
-static timeval timeout{0, 1000};
+static timeval timeout{0, 10000};
 #define TIMEOUT timeout
 
 struct SeqCounter {
@@ -67,7 +67,7 @@ struct PingConfig {
     std::string name;
     std::uint32_t Id;
     PingStatus status = PingStatus::W_4_SEND;
-    IcmpMsg icmpMsg;
+    // IcmpMsg icmpMsg;
 };
 
 class Ping {

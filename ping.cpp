@@ -8,7 +8,7 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     ssize_t payload_buffer_len;
     char control_buffer[4096];
     struct iovec payload_iovec;
-    icmphdr *payload_icmp_hdr;
+    icmphdr *hdr;
 
     int data_offset;
     uint32_t msg_key;
@@ -38,12 +38,6 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
 
     data_offset = payload_buffer_len - PING_PKT_S + sizeof(icmphdr);
 
-    // payload_icmp_hdr =
-    //     (icmphdr *)(payload_buffer + payload_buffer_len - PING_PKT_S);
-
-    // std::cout << "type: " << std::hex << (int)payload_icmp_hdr->type
-    //           << "|code: " << (int)payload_icmp_hdr->code << std::endl;
-
     msg_key = *((uint32_t *)(payload_buffer + (payload_buffer_len - PING_PKT_S +
                                                sizeof(icmphdr))));
     if (addrCfgs.find(msg_key) != addrCfgs.end()) {
@@ -64,14 +58,13 @@ int ping_send_one(int sock, u_int16_t nb, uint32_t msg_key,
     PingPkg pkg;
     memset(&pkg, 0, sizeof(pkg));
 
-    pkg.payload_icmp_hdr.type = ICMP_ECHO;
-    pkg.payload_icmp_hdr.un.echo.id =
-        getpid() % std::numeric_limits<u_int16_t>::max();
+    pkg.hdr.type = ICMP_ECHO;
+    pkg.hdr.un.echo.id = getpid() % std::numeric_limits<u_int16_t>::max();
     pkg.setNbAsMsg(msg_key);
 
-    pkg.payload_icmp_hdr.un.echo.sequence = nb;
+    pkg.hdr.un.echo.sequence = nb;
 
-    pkg.payload_icmp_hdr.checksum = checksum(&pkg, sizeof(pkg));
+    pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
 
     send_size = sendto(sock, &pkg, sizeof(pkg), 0,
                        (struct sockaddr *)&(addrToSockAddr[currIP]),
@@ -122,7 +115,8 @@ bool Ping::Init() {
 
 std::map<std::uint32_t, PingConfig> Ping::Exec() {
     int max_fd = sock;
-    timeval timeout{0, 10000};
+    uint32_t usecTimeout = (uint32_t)(
+        (TIMEOUT.tv_sec * 1000000 + TIMEOUT.tv_usec) / this->addrCfgs.size());
 
     for (std::map<std::uint32_t, PingConfig>::iterator it =
              this->addrCfgs.begin();
@@ -133,6 +127,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
 
         FD_ZERO(&read_fds);
         FD_ZERO(&write_fds);
+        timeval currTimeout{usecTimeout / 1000000, usecTimeout % 1000000};
 
         if (it->second.status == PingStatus::W_4_ANSV) {
             FD_SET(sock, &read_fds);
