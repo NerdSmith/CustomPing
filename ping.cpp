@@ -1,7 +1,5 @@
 #include "ping.h"
 
-#include <iostream>
-
 int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     struct msghdr msg_hdr;
     char payload_buffer[4096];
@@ -37,12 +35,6 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     }
 
     data_offset = payload_buffer_len - PING_PKT_S + sizeof(icmphdr);
-
-    // payload_icmp_hdr =
-    //     (icmphdr *)(payload_buffer + payload_buffer_len - PING_PKT_S);
-
-    // std::cout << "type: " << std::hex << (int)payload_icmp_hdr->type
-    //           << "|code: " << (int)payload_icmp_hdr->code << std::endl;
 
     msg_key = *((uint32_t *)(payload_buffer + (payload_buffer_len - PING_PKT_S +
                                                sizeof(icmphdr))));

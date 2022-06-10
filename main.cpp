@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     pc1.Id = 1;
 
     PingConfig pc2;
-    pc2.IP = "5.255.255.81";
+    pc2.IP = "5.255.255.80";
     pc2.name = "yandex";
     pc2.Id = 2;
 
