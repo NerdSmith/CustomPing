@@ -130,7 +130,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
         FD_ZERO(&read_fds);
         FD_ZERO(&write_fds);
 
-        timeval to{0, 1};
+        timeval select_timeout{0, 0};
 
         if (it->second.status == PingStatus::W_4_ANSV) {
             FD_SET(sock, &read_fds);
@@ -140,7 +140,8 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
             FD_SET(sock, &write_fds);
         }
 
-        int status = select(max_fd + 1, &read_fds, &write_fds, NULL, &to);
+        int status =
+            select(max_fd + 1, &read_fds, &write_fds, NULL, &select_timeout);
 
         if (status == -1) {
             return this->addrCfgs;
