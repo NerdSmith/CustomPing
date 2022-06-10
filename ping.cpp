@@ -64,14 +64,13 @@ int ping_send_one(int sock, u_int16_t nb, uint32_t msg_key,
     PingPkg pkg;
     memset(&pkg, 0, sizeof(pkg));
 
-    pkg.payload_icmp_hdr.type = ICMP_ECHO;
-    pkg.payload_icmp_hdr.un.echo.id =
-        getpid() % std::numeric_limits<u_int16_t>::max();
+    pkg.hdr.type = ICMP_ECHO;
+    pkg.hdr.un.echo.id = getpid() % std::numeric_limits<u_int16_t>::max();
     pkg.setNbAsMsg(msg_key);
 
-    pkg.payload_icmp_hdr.un.echo.sequence = nb;
+    pkg.hdr.un.echo.sequence = nb;
 
-    pkg.payload_icmp_hdr.checksum = checksum(&pkg, sizeof(pkg));
+    pkg.hdr.checksum = checksum(&pkg, sizeof(pkg));
 
     send_size = sendto(sock, &pkg, sizeof(pkg), 0,
                        (struct sockaddr *)&(addrToSockAddr[currIP]),
@@ -122,7 +121,6 @@ bool Ping::Init() {
 
 std::map<std::uint32_t, PingConfig> Ping::Exec() {
     int max_fd = sock;
-    timeval timeout{0, 10000};
 
     for (std::map<std::uint32_t, PingConfig>::iterator it =
              this->addrCfgs.begin();
@@ -142,7 +140,7 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
             FD_SET(sock, &write_fds);
         }
 
-        int status = select(max_fd + 1, &read_fds, &write_fds, NULL, &TIMEOUT);
+        int status = select(max_fd + 1, &read_fds, &write_fds, NULL, 0);
 
         if (status == -1) {
             return this->addrCfgs;

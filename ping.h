@@ -20,8 +20,8 @@
 
 #define PING_PKT_S 64
 
-static timeval timeout{0, 1000};
-#define TIMEOUT timeout
+// static timeval timeout{0, 1000};
+// #define TIMEOUT timeout
 
 struct SeqCounter {
     u_int16_t nb = 0;
