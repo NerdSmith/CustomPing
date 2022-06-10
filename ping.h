@@ -20,7 +20,7 @@
 
 #define PING_PKT_S 64
 
-// static timeval timeout{0, 1000};
+static timeval timeout{0, 1};
 // #define TIMEOUT timeout
 
 struct SeqCounter {
@@ -59,7 +59,7 @@ struct PingPkgRecv {
 
 unsigned short checksum(void *b, int len);
 
-enum class PingStatus { W_4_SEND, W_4_ANSV, OK, ERR };
+enum class PingStatus { W_4_SEND, W_4_ANSV, OK, ERR, TIMEOUT };
 
 struct PingConfig {
     std::string IP;
@@ -68,6 +68,8 @@ struct PingConfig {
     std::uint32_t Id;
     PingStatus status = PingStatus::W_4_SEND;
     IcmpMsg icmpMsg;
+    timeval sendTime;
+    timeval recvTime;
 };
 
 class Ping {

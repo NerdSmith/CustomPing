@@ -17,6 +17,12 @@ void printPingConfig(const PingConfig &pCfg) {
     case (PingStatus::OK):
         status = "OK";
         break;
+    case (PingStatus::ERR):
+        status = "ERR";
+        break;
+    case (PingStatus::TIMEOUT):
+        status = "TIMEOUT";
+        break;
     }
 
     std::cout << pCfg.IP << " " << pCfg.name << " " << pCfg.Id << " " << status
