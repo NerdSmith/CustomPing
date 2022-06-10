@@ -47,7 +47,10 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     msg_key = *((uint32_t *)(payload_buffer + (payload_buffer_len - PING_PKT_S +
                                                sizeof(icmphdr))));
     if (addrCfgs.find(msg_key) != addrCfgs.end()) {
-        addrCfgs[msg_key].status = PingStatus::OK;
+        if (addrCfgs[msg_key].status != PingStatus::TIMEOUT) {
+            gettimeofday(&addrCfgs[msg_key].recvTime, NULL);
+            addrCfgs[msg_key].status = PingStatus::OK;
+        }
     } else {
         return -1;
     }
@@ -79,6 +82,7 @@ int ping_send_one(int sock, u_int16_t nb, uint32_t msg_key,
         addrCfgs[msg_key].status = PingStatus::ERR;
         return 1;
     } else {
+        gettimeofday(&addrCfgs[msg_key].sendTime, NULL);
         addrCfgs[msg_key].status = PingStatus::W_4_ANSV;
     }
 
@@ -121,6 +125,8 @@ bool Ping::Init() {
 
 std::map<std::uint32_t, PingConfig> Ping::Exec() {
     int max_fd = sock;
+    timeval now;
+    timeval tdiff;
 
     for (std::map<std::uint32_t, PingConfig>::iterator it =
              this->addrCfgs.begin();
@@ -145,7 +151,15 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
         if (status == -1) {
             return this->addrCfgs;
         } else if (status == 0) {
-            continue;
+            gettimeofday(&now, NULL);
+            timersub(&now, &(it->second.sendTime), &tdiff);
+            if (timercmp(&tdiff, &timeout, <)) {
+                timerclear(&tdiff);
+                timerclear(&now);
+                continue;
+            } else {
+                it->second.status = PingStatus::TIMEOUT;
+            }
         }
 
         if (FD_ISSET(sock, &read_fds)) {
