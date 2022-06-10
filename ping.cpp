@@ -159,4 +159,4 @@ std::map<std::uint32_t, PingConfig> Ping::Exec() {
     return this->addrCfgs;
 }
 
-Ping::~Ping() {}
+Ping::~Ping() { close(this->sock); }
