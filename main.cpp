@@ -40,7 +40,10 @@ void printMap(std::map<std::uint32_t, PingConfig> myMap) {
 bool checkAllStatus(std::map<std::uint32_t, PingConfig> addrss) {
     for (std::map<std::uint32_t, PingConfig>::iterator it = addrss.begin();
          it != addrss.end(); ++it) {
-        if (it->second.status != PingStatus::OK) {
+        if (it->second.status == PingStatus::OK ||
+            it->second.status == PingStatus::TIMEOUT) {
+            continue;
+        } else {
             return false;
         }
     }
@@ -55,7 +58,7 @@ int main(int argc, char *argv[]) {
     pc1.Id = 1;
 
     PingConfig pc2;
-    pc2.IP = "5.255.255.80";
+    pc2.IP = "5.255.255.81";
     pc2.name = "yandex";
     pc2.Id = 2;
 
@@ -76,10 +79,10 @@ int main(int argc, char *argv[]) {
     int c;
     while (!checkAllStatus(testAddrss)) {
         testAddrss = ping.Exec();
-        printMap(testAddrss);
+        // printMap(testAddrss);
         c++;
     }
-
+    printMap(testAddrss);
     // sleep(1);
 
     // sleep(1);
