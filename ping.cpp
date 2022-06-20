@@ -6,7 +6,6 @@ int ping_receive_one(int sock, std::map<std::uint32_t, PingConfig> &addrCfgs) {
     ssize_t payload_buffer_len;
     char control_buffer[4096];
     struct iovec payload_iovec;
-    icmphdr *payload_icmp_hdr;
 
     int data_offset;
     uint32_t msg_key;
@@ -101,6 +100,8 @@ Ping::Ping(std::map<std::uint32_t, PingConfig> addrCfgs) {
 }
 
 bool Ping::Init() {
+    struct sockaddr_in address;
+
     for (const auto &kv : this->addrCfgs) {
 
         addrToSockAddr[kv.second.IP];
@@ -109,6 +110,14 @@ bool Ping::Init() {
             inet_addr(kv.second.IP.c_str());
     }
     if ((sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+        return false;
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    // address.sin_port = htons(PORT);
+
+    if (bind(sock, (struct sockaddr *)&address, sizeof(address)) < 0) {
         return false;
     }
 
